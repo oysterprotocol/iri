@@ -1,18 +1,18 @@
 package com.iota.iri.service.dto;
 
-import java.util.List;
+import com.iota.iri.model.Hash;
 
 public class GetBulkTransactionsToApproveResponse extends AbstractResponse {
 
-    private String[] transactions;
+    private Hash[] transactions;
 
-    public static AbstractResponse create(List<String> elements) {
+    public static AbstractResponse create(Hash[] transactionList) {
         GetBulkTransactionsToApproveResponse res = new GetBulkTransactionsToApproveResponse();
-        res.transactions = elements.toArray(new String[] {});
+        res.transactions = transactionList;
         return res;
     }
 
-    public String[] getTransactions() {
+    public Hash[] getTransactions() {
         return transactions;
     }
 }
