@@ -4,15 +4,15 @@ import com.iota.iri.model.Hash;
 
 public class GetBulkTransactionsToApproveResponse extends AbstractResponse {
 
-    private String[] transactions;
+    private Hash[] transactions;
 
-    public static AbstractResponse create(Hash[] transactions) {
+    public static AbstractResponse create(Hash[] transactionList) {
         GetBulkTransactionsToApproveResponse res = new GetBulkTransactionsToApproveResponse();
-        res.transactions = transactions;
+        res.transactions = transactionList;
         return res;
     }
 
-    public String[] getTransactions() {
+    public Hash[] getTransactions() {
         return transactions;
     }
 }
