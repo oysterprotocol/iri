@@ -283,11 +283,38 @@ public class API {
                         numWalks = minRandomWalks;
                     }
                     try {
-                        final Hash[] tips = getTransactionToApproveStatement(depth, reference, numWalks);
+                        final Hash[] tips = getTransactionToApproveStatement(depth, reference, numWalks, 2);
                         if(tips == null) {
                             return ErrorResponse.create("The subtangle is not solid");
                         }
                         return GetTransactionsToApproveResponse.create(tips[0], tips[1]);
+                    } catch (RuntimeException e) {
+                        log.info("Tip selection failed: " + e.getLocalizedMessage());
+                        return ErrorResponse.create(e.getLocalizedMessage());
+                    }
+                }
+                case "getBulkTransactionsToApprove": {
+                    if (invalidSubtangleStatus()) {
+                        return ErrorResponse
+                                .create("This operations cannot be executed: The subtangle has not been updated yet.");
+                    }
+
+                    final String reference = request.containsKey("reference") ? getParameterAsStringAndValidate(request,"reference", HASH_SIZE) : null;
+                    final int depth = getParameterAsInt(request, "depth");
+                    final int quantity = getParameterAsInt(request, "quantity");
+                    if(depth < 0 || (reference == null && depth == 0)) {
+                        return ErrorResponse.create("Invalid depth input");
+                    }
+                    int numWalks = request.containsKey("numWalks") ? getParameterAsInt(request,"numWalks") : 1;
+                    if(numWalks < minRandomWalks) {
+                        numWalks = minRandomWalks;
+                    }
+                    try {
+                        final Hash[] tips = getTransactionToApproveStatement(depth, reference, numWalks, quantity);
+                        if(tips == null) {
+                            return ErrorResponse.create("The subtangle is not solid");
+                        }
+                        return GetBulkTransactionsToApproveResponse.create(tips);
                     } catch (RuntimeException e) {
                         log.info("Tip selection failed: " + e.getLocalizedMessage());
                         return ErrorResponse.create(e.getLocalizedMessage());
@@ -458,7 +485,7 @@ public class API {
 
         return CheckConsistency.create(state,info);
     }
-    
+
     private double getParameterAsDouble(Map<String, Object> request, String paramName) throws ValidationException {
         validateParamExists(request, paramName);
         final double result;
@@ -568,8 +595,8 @@ public class API {
         ellapsedTime_getTxToApprove += ellapsedTime;
     }
 
-    public synchronized Hash[] getTransactionToApproveStatement(int depth, final String reference, final int numWalks) throws Exception {
-        int tipsToApprove = 2;
+    public synchronized Hash[] getTransactionToApproveStatement(int depth, final String reference, final int numWalks, final int quantity) throws Exception {
+        int tipsToApprove = quantity;
         Hash[] tips = new Hash[tipsToApprove];
         final SecureRandom random = new SecureRandom();
         final int randomWalkCount = numWalks > maxRandomWalks || numWalks < 1 ? maxRandomWalks:numWalks;
