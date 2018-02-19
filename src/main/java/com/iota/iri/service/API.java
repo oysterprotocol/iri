@@ -315,11 +315,7 @@ public class API {
                             return ErrorResponse.create("The subtangle is not solid");
                         }
 
-                        final List<String> elements = tips.stream()
-                                .map(Hash::toString)
-                                .collect(Collectors.toCollection(LinkedList::new));
-
-                        return GetBulkTransactionsToApproveResponse.create(elements);
+                        return GetBulkTransactionsToApproveResponse.create(tips);
                     } catch (RuntimeException e) {
                         log.info("Tip selection failed: " + e.getLocalizedMessage());
                         return ErrorResponse.create(e.getLocalizedMessage());
